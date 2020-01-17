@@ -9,3 +9,4 @@ from dash.dependencies import Input, Output, State, Event
 from jupyter_plotly_dash import JupyterDash
 
 app = JupyterDash('Chicago Car Crashes')
+mapbox_token = os.environ.get('MAPBOXTOKEN')
