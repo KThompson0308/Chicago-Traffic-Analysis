@@ -75,7 +75,7 @@
 
 * __INJURIES_INCAPACITATING__ - Total persons sustaining incapacitating/serious injuries in the crash, as determined by reporting officer. An incapacitating injury is any non-fatal injury that prevents the injured person from walking, driving, or normally continuing the activities they were capable of performing before the injury occurred. Includes severe lacerations, broken limbs, skull or chest injuries, and abdominal injuries.
 
-*__INJURIES_NON_INCAPACITATING__ - Total persons sustaining non-incapacitating injuries in the crash as determined by reporting officer. Any non-fatal, non-incapacitating injury that is evident to observers at the scene of the crash. Includes lump on head, abrasions, bruises, and minor lacerations.
+* __INJURIES_NON_INCAPACITATING__ - Total persons sustaining non-incapacitating injuries in the crash as determined by reporting officer. Any non-fatal, non-incapacitating injury that is evident to observers at the scene of the crash. Includes lump on head, abrasions, bruises, and minor lacerations.
 
 * __INJURIES_REPORTED_NOT_EVIDENT__ - Total persons sustaining posssible injuries in the crash as determined by the reporting officer. Includes momentary unconsciousness, claims of injuries not evident, limping, complaint of pain, nausea, and hysteria.
 
