@@ -28,7 +28,7 @@ dtypes = {'TRAFFIC_CONTROL_DEVICE': 'category', 'DEVICE_CONDITION': 'category',
          'MOST_SEVERE_INJURY': 'category'}
 
 
-crashes = pd.read_csv('../TrafficCrashesChicago.csv',
+crashes = pd.read_csv('../data/TrafficCrashesChicago.csv',
                       parse_dates=['CRASH_DATE_EST_I', 'CRASH_DATE',
                                    'DATE_POLICE_NOTIFIED'],
                       dtype=dtypes)
