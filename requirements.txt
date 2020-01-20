@@ -71,6 +71,7 @@ phik==0.9.8
 pickleshare==0.7.5
 plotly==4.4.1
 pluggy==0.13.1
+prince==0.6.3
 prometheus-client==0.7.1
 prompt-toolkit==3.0.2
 ptyprocess==0.6.0
