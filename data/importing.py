@@ -1,7 +1,12 @@
 import pandas as pd
-
+import rpy2.robjects as robjects
+from rpy2.robjects import pandas2ri
 #  data types for importing
-dtypes = {'TRAFFIC_CONTROL_DEVICE': 'category', 'DEVICE_CONDITION': 'category',
+
+
+
+def read_crashes(file):
+    dtypes = {'TRAFFIC_CONTROL_DEVICE': 'category', 'DEVICE_CONDITION': 'category',
          'WEATHER_CONDITION': 'category', 'LIGHTING_CONDITION': 'category', 'FIRST_CRASH_TYPE': 'category',
          'TRAFFICWAY_TYPE': 'category', 'ROADWAY_SURFACE_COND': 'category', 'ROAD_DEFECT': 'category',
          'REPORT_TYPE': 'category', 'CRASH_TYPE': 'category', 'INTERSECTION_RELATED_I': 'category',
@@ -11,5 +16,7 @@ dtypes = {'TRAFFIC_CONTROL_DEVICE': 'category', 'DEVICE_CONDITION': 'category',
          'DOORING_I': 'category', 'WORK_ZONE_I': 'category', 'WORK_ZONE_TYPE': 'category', 'WORKERS_PRESENT_I': 'category',
          'MOST_SEVERE_INJURY': 'category'}
 
-# missing value codes for importing
-na_values = {}
+    crashes = pd.read_csv(str(file), dtype=dtypes, parse_dates = ['CRASH_DATE', 'CRASH_DATE_EST_I',
+                                                                  'DATE_POLICE_NOTIFIED'])
+    return crashes
+
