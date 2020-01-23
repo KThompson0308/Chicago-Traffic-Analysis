@@ -3,11 +3,10 @@ import os
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State, Event
+from dash.dependencies import Input, Output, State
 import jupyter_plotly_dash
 import pandas as pd
 import plotly.graph_objs as go
-import plotly.offline as offline
 
 
 app = dash.Dash(__name__)
@@ -31,45 +30,21 @@ dtypes = {'TRAFFIC_CONTROL_DEVICE': 'category', 'DEVICE_CONDITION': 'category',
 crashes = pd.read_csv('../data/TrafficCrashesChicago.csv',
                       parse_dates=['CRASH_DATE_EST_I', 'CRASH_DATE',
                                    'DATE_POLICE_NOTIFIED'],
-                      dtype=dtypes)
+                      dtype=dtypes,
+                      nrows = 500)
 
 
 
-
-layout_map = dict(
-    autosize=True,
-    height=500,
-    hovermode="closest",
-    title="Crashes in Chicago",
-    mapbox=dict(
-        accesstoken=mapbox_token,
-        style="light",
-        center=dict(
-            lon=crashes['LONGITUDE'].median(),
-            lat=crashes['LATITUDE'].median()
+app.layout = html.Div(
+    id="root",
+    children=[
+        html.Div(
+            id="header",
         )
-    )
+    ]
 )
 
-def generate_map(crash_data, layout_map):
-    return {
-        "data": [{
-            "type": "scattermapbox",
-            "lat": list(crash_data['LATITUDE']),
-            "lon": list(crash_data['LONGITUDE']),
-            "mode": "markers",
-            "marker": {
-                "size": 6,
-                "opacity": 0.7
-            }
-        }],
-        "layout": layout_map
-    }
 
 
-app.layout = html.Div(children=[
-    html.Div([
-        html.H1(children="Car Crash Map of Chicago Since 2013"),
-        html
-    ])
-])
+if __name__ == '__main__':
+    app.run_server(debug=True)

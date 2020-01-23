@@ -90,3 +90,6 @@
 * __LONGITUDE__ - The longitude of the crash location, as determined by reporting officer.
 
 * __LOCATION__ - The crash location, as determined by the latitude and longitude. 
+
+
+UP-TO-DATE TYPICAL SHIFT OF POLICE OFFICERS CAN BE FOUND AT https://chicago.suntimes.com/city-hall/2019/10/7/20903404/chicago-police-department-officers-start-times-rescinded-fraternal-order-union
