@@ -93,3 +93,5 @@
 
 
 UP-TO-DATE TYPICAL SHIFT OF POLICE OFFICERS CAN BE FOUND AT https://chicago.suntimes.com/city-hall/2019/10/7/20903404/chicago-police-department-officers-start-times-rescinded-fraternal-order-union
+
+GOOGLE ROADS API for retrieving speed limits for dataset. https://developers.google.com/maps/documentation/roads/speed-limits
