@@ -1,0 +1,36 @@
+---
+title: "Exploration of Chicago Car Crash Data"
+author: "Kevin Thompson, Dilruksha Jayaweera, Heber Nielsen, Sangrae Cho, Pradeep (Last Name)"
+date: |
+  Data Science Program, Southern Methodist University, USA \break
+lang: en-US
+class: man
+figsintext: true
+numbersections: true
+encoding: UTF-8
+bibliography: crashes.bib
+biblio-style: apalike
+output:
+  bookdown::pdf_document2:
+     citation_package: natbib
+     keep_tex: true
+     toc: false
+header-includes:
+   - \usepackage{amsmath}
+   - \usepackage[utf8]{inputenc}
+   - \usepackage[T1]{fontenc}
+   - \usepackage{setspace}
+   - \usepackage{hyperref}
+   - \onehalfspacing
+   - \setcitestyle{round}
+   - \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Test
+

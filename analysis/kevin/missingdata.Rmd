@@ -87,5 +87,5 @@ crashes_new <- future_map_dfc(crashes, new_replace_with_na, condition = ~.x %in%
 miss_var_summary(crashes_new)
 ```
 
-We should remove missing values for location since location is a pivotal to our project. It is such a small percentage of our data that this should not noticeably impact our results. We will do listwise deletion for LOCATION and BEAT_OF_OCCURRENCE. Using the google roads api, we can attempt to fill in values for POSTED_SPEED_LIMIT that seem unreasonable. 
+We should remove missing values for location since location is a pivotal to our project. It is such a small percentage of our data that this should not noticeably impact our results. We will do listwise deletion for LOCATION and BEAT_OF_OCCURRENCE. Using the google roads api, we can attempt to fill in values for POSTED_SPEED_LIMIT that seem unreasonable. We can also use 
 
