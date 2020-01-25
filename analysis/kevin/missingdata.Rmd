@@ -10,42 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(naniar)
 library(furrr)
-crashes = read_csv("../../data/TrafficCrashesChicago.csv", col_types = cols(
-  RD_NO = col_character(),
-  CRASH_DATE_EST_I = col_factor(),
-  CRASH_DATE = col_datetime(format = "%m/%d/%Y %H:%M:%S %p"),
-  POSTED_SPEED_LIMIT = col_double(),
-  TRAFFIC_CONTROL_DEVICE = col_factor(),
-  DEVICE_CONDITION = col_factor(),
-  WEATHER_CONDITION = col_factor(),
-  LIGHTING_CONDITION = col_factor(),
-  FIRST_CRASH_TYPE = col_factor(),
-  TRAFFICWAY_TYPE = col_factor(),
-  LANE_CNT = col_double(),
-  ALIGNMENT = col_factor(),
-  ROADWAY_SURFACE_COND = col_factor(),
-  ROAD_DEFECT = col_factor(),
-  REPORT_TYPE = col_factor(),
-  CRASH_TYPE = col_factor(),
-  INTERSECTION_RELATED_I = col_factor(),
-  NOT_RIGHT_OF_WAY_I = col_factor(),
-  HIT_AND_RUN_I = col_factor(),
-  DAMAGE = col_factor(),
-  DATE_POLICE_NOTIFIED = col_datetime(format = "%m/%d/%Y %H:%M:%S %p"),
-  PRIM_CONTRIBUTORY_CAUSE = col_factor(),
-  SEC_CONTRIBUTORY_CAUSE = col_factor(),
-  STREET_NO = col_character(),
-  STREET_DIRECTION = col_factor(),
-  STREET_NAME = col_character(),
-  BEAT_OF_OCCURRENCE = col_factor(),
-  PHOTOS_TAKEN_I = col_factor(),
-  STATEMENTS_TAKEN_I = col_factor(),
-  DOORING_I = col_factor(),
-  WORK_ZONE_I = col_factor(),
-  WORK_ZONE_TYPE = col_factor(),
-  WORKERS_PRESENT_I = col_factor(),
+crashes = read_csv("../../data/ChicagoCrashesPerHour.csv", col_types = cols_only(
+  NUM_ACCIDENTS = col_double(),
+  CRASH_DATE = col_datetime(format = "%Y-%m-%d %H:%M:%S"),
+  HIT_AND_RUN_I = col_double(),
   NUM_UNITS = col_double(),
-  MOST_SEVERE_INJURY = col_factor(),
   INJURIES_TOTAL = col_double(),
   INJURIES_FATAL = col_double(),
   INJURIES_INCAPACITATING = col_double(),
@@ -53,39 +22,23 @@ crashes = read_csv("../../data/TrafficCrashesChicago.csv", col_types = cols(
   INJURIES_REPORTED_NOT_EVIDENT = col_double(),
   INJURIES_NO_INDICATION = col_double(),
   INJURIES_UNKNOWN = col_double(),
-  CRASH_HOUR = col_integer(),
-  CRASH_DAY_OF_WEEK = col_integer(),
-  CRASH_MONTH = col_integer(),
-  LATITUDE = col_double(),
-  LONGITUDE = col_double(),
-  LOCATION = col_character()
+  WEATHER_MAIN = col_factor(),
+  WEATHER_DESCRIPTION = col_factor(),
+  BEAT_OF_OCCURRENCE = col_factor(),
+  SHIFT = col_factor()
 ))
 
 ```
 
 
 ```{r summary}
-summary(crashes)
+crashes_new <- crashes %>% filter(CRASH_DATE > '2018-01-01 00:00:00') %>% complete(CRASH_DATE, SHIFT, BEAT_OF_OCCURRENCE)
+crashes_new <- modify_if(crashes_new, is.numeric, function(x){x[is.na(x)] <- 0})
+crashes_new <- crashes_new %>% tidyr::fill(WEATHER_MAIN, WEATHER_DESCRIPTION, .direction = "down")
 ```
 
-```{r missingvars, echo=TRUE}
-future::plan(multiprocess)
-suspicious_levels <- c("UNABLE TO DETERMINE", "UNKNOWN")
-
-new_replace_with_na <- function(df, condition) {
-  tempdf <- df
-  tempdf[rlang::as_function(condition)(tempdf)] <- NA
-  return(tempdf)
-}
-
-crashes_new <- future_map_dfc(crashes, new_replace_with_na, condition = ~.x %in% suspicious_levels)
-
-```
 
 
 ```{r resample, echo=TRUE}
 miss_var_summary(crashes_new)
 ```
-
-We should remove missing values for location since location is a pivotal to our project. It is such a small percentage of our data that this should not noticeably impact our results. We will do listwise deletion for LOCATION and BEAT_OF_OCCURRENCE. Using the google roads api, we can attempt to fill in values for POSTED_SPEED_LIMIT that seem unreasonable. We can also use 
-
