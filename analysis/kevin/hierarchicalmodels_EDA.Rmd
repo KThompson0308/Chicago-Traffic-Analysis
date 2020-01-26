@@ -1,0 +1,17 @@
+---
+title: "Hierarchical Modelling"
+author: "Kevin Thompson"
+date: "January 25, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rethinking)
+```
+
+
+```{r setup }
+
+
+```
