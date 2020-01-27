@@ -25,7 +25,7 @@
 \usepackage{hyperref}
 \hypersetup{unicode=true,
             pdftitle={Exploration of Chicago Car Crash Data},
-            pdfauthor={Kevin Thompson, Dilruksha Jayaweera, Heber Nielsen, Sangrae Cho, Pradeep (Last Name)},
+            pdfauthor={Kevin Thompson, Dilruksha Jayaweera, Heber Nielsen, Sangrae Cho, Kumaraiah Pradeepkumar},
             pdfborder={0 0 0},
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
@@ -37,6 +37,46 @@
 \fi
 \usepackage{natbib}
 \bibliographystyle{apalike}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
 \usepackage{longtable,booktabs}
 \usepackage{graphicx,grffile}
 \makeatletter
@@ -86,8 +126,8 @@
   \title{Exploration of Chicago Car Crash Data}
     \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
-    \author{Kevin Thompson, Dilruksha Jayaweera, Heber Nielsen, Sangrae Cho, Pradeep
-(Last Name)}
+    \author{Kevin Thompson, Dilruksha Jayaweera, Heber Nielsen, Sangrae Cho,
+Kumaraiah Pradeepkumar}
     \preauthor{\centering\large\emph}
   \postauthor{\par}
       \predate{\centering\large\emph}
@@ -111,16 +151,40 @@
 Car accidents are no trivial matter in the United States. Roughly 800
 car accidents occur every day in Illinois alone \citep{tribune}. Our
 project is to develop models to both predict and explain a subset of
-these entirely avoidable accidents in Chicago, Illinois. We use data
-from Google's Roads API, OpenWeather's historical weather database, and
-the city government of Chicago's website to construct these models and
-insights. These datasets include factors that are widely believed to
-contribute to higher accident rates, such as weather, time, location,
-road conditions, and so forth.
+these entirely avoidable accidents in Chicago, Illinois. OpenWeather's
+historical weather database and the city government of Chicago's website
+to construct these models and insights. These datasets include factors
+that are widely believed to contribute to higher accident rates, such as
+weather, time, location, road conditions, and so forth.
 
 The primary goal of our exploration is to explore useful features for
-predicting the number of accidents in a given shift and location
+predicting the number of accidents in a given police shift in location
 clusters called ``police beats''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ pandas }\ImportTok{as}\NormalTok{ pd}
+\ImportTok{import}\NormalTok{ matplotlib.pyplot }\ImportTok{as}\NormalTok{ plt }
+
+\NormalTok{pd.options.display.width }\OperatorTok{=} \DecValTok{0}
+\NormalTok{pd.set_option(}\StringTok{'precision'}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+
+\NormalTok{crashes }\OperatorTok{=}\NormalTok{ pd.read_csv(}\StringTok{"data/ChicagoCrashesPerHour2.csv"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(crashes.describe())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##           SHIFT  BEAT_OF_OCCURRENCE  NUM_UNITS  INJURIES_TOTAL  INJURIES_FATAL  INJURIES_INCAPACITATING  INJURIES_NON_INCAPACITATING  INJURIES_REPORTED_NOT_EVIDENT  INJURIES_NO_INDICATION  INJURIES_UNKNOWN  HIT_AND_RUN_I  NUM_ACCIDENTS
+## count  1.45e+07            1.45e+07   1.45e+07        1.45e+07        1.45e+07                 1.45e+07                     1.45e+07                       1.45e+07                1.45e+07          1.45e+07       1.45e+07       1.45e+07
+## mean   2.00e+00            1.21e+03   0.00e+00        0.00e+00        0.00e+00                 0.00e+00                     0.00e+00                       0.00e+00                0.00e+00          0.00e+00       0.00e+00       0.00e+00
+## std    8.16e-01            6.99e+02   0.00e+00        0.00e+00        0.00e+00                 0.00e+00                     0.00e+00                       0.00e+00                0.00e+00          0.00e+00       0.00e+00       0.00e+00
+## min    1.00e+00            1.11e+02   0.00e+00        0.00e+00        0.00e+00                 0.00e+00                     0.00e+00                       0.00e+00                0.00e+00          0.00e+00       0.00e+00       0.00e+00
+## 25%    1.00e+00            6.32e+02   0.00e+00        0.00e+00        0.00e+00                 0.00e+00                     0.00e+00                       0.00e+00                0.00e+00          0.00e+00       0.00e+00       0.00e+00
+## 50%    2.00e+00            1.12e+03   0.00e+00        0.00e+00        0.00e+00                 0.00e+00                     0.00e+00                       0.00e+00                0.00e+00          0.00e+00       0.00e+00       0.00e+00
+## 75%    3.00e+00            1.81e+03   0.00e+00        0.00e+00        0.00e+00                 0.00e+00                     0.00e+00                       0.00e+00                0.00e+00          0.00e+00       0.00e+00       0.00e+00
+## max    3.00e+00            2.54e+03   0.00e+00        0.00e+00        0.00e+00                 0.00e+00                     0.00e+00                       0.00e+00                0.00e+00          0.00e+00       0.00e+00       0.00e+00
+\end{verbatim}
 
 \bibliography{crashes.bib}
 

@@ -1,6 +1,6 @@
 ---
 title: "Exploration of Chicago Car Crash Data"
-author: "Kevin Thompson, Dilruksha Jayaweera, Heber Nielsen, Sangrae Cho, Pradeep (Last Name)"
+author: "Kevin Thompson, Dilruksha Jayaweera, Heber Nielsen, Sangrae Cho, Kumaraiah Pradeepkumar"
 date: |
   Data Science Program, Southern Methodist University, USA \break
 lang: en-US
@@ -30,14 +30,25 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
 ```
 
 \section{Introduction}
 
-  Car accidents are no trivial matter in the United States. Roughly 800 car accidents occur every day in Illinois alone \citep{tribune}. Our project is to develop models to both predict and explain a subset of these entirely avoidable accidents in Chicago, Illinois. We use data from Google's Roads API, OpenWeather's historical weather database, and the city government of Chicago's website to construct these models and insights. These datasets include factors that are widely believed to contribute to higher accident rates, such as weather, time, location, road conditions, and so forth.
+  Car accidents are no trivial matter in the United States. Roughly 800 car accidents occur every day in Illinois alone \citep{tribune}. Our project is to develop models to both predict and explain a subset of these entirely avoidable accidents in Chicago, Illinois. OpenWeather's historical weather database and the city government of Chicago's website to construct these models and insights. These datasets include factors that are widely believed to contribute to higher accident rates, such as weather, time, location, road conditions, and so forth.
 
-  The primary goal of our exploration is to explore useful features for predicting the number of accidents in a given shift and location clusters called "police beats".
+  The primary goal of our exploration is to explore useful features for predicting the number of accidents in a given police shift in location clusters called "police beats".
+  
+```{python preprocessing}
+import pandas as pd
+import matplotlib.pyplot as plt 
 
+pd.options.display.width = 0
+pd.set_option('precision', 2)
+
+crashes = pd.read_csv("data/ChicagoCrashesPerHour2.csv")
+print(crashes.describe())
+```
 
 
 

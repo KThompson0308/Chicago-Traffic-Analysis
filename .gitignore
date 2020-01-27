@@ -8,3 +8,4 @@ ChicagoCrashesPerHour2.csv
 .Rproj.user
 .Rhistory
 
+packrat/lib*/
