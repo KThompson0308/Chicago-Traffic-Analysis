@@ -1,18 +1,17 @@
 import os
-import sys
 import multiprocessing
+from joblib import Parallel, delayed
 from pathlib import Path
-from pprint import pprint
 
 import numpy as np
 import geopandas as gdp
 from pandas import read_csv
 
 
-# Multiprocessing for reading crashes
-pool = multiprocessing.Pool()
-
-
+def applyParallel(grouped_df, func):
+    max_cores = multiprocessing.cpu_count - 1
+    result = Parallel(n_jobs=max_cores)(delayed(func)(group) for name, group in grouped_df)
+    return pd.concat(result)
 
 # Retrieve all filepaths and place in a nested dictionary
 def retrieve_filepaths(data_directory_name, filetypes=['csv']):
@@ -34,7 +33,3 @@ def get_paths_for_filetype(filetype, path_object):
     for filename in files.keys():
         files[filename] = [datapath for datapath in paths if filename in datapath]
     return files
-
-
-
-pprint(retrieve_filepaths('data', ['csv', 'geojson']))
