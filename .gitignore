@@ -7,4 +7,6 @@ ChicagoCrashesPerHour2.csv
 .ipynb_checkpoints
 .Rproj.user
 .Rhistory
+.pytest_cache
 
+packrat/lib*/
