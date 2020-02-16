@@ -9,11 +9,21 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(tibble)
+library(rlang)
 library(rethinking)
 library(dplyr)
+library(FactoMineR)
+library(lubridate)
+library(factoextra)
+library(missMDA)
+library(purrr)
+library(naniar)
 
-crashes <- read_csv("data/TrafficCrashesChicago.csv")
-weather <- read_csv("data/ChicagoWeather.csv")
+
+crashes <- read_csv("../../data/TrafficCrashesChicago.csv")
+weather <- read_csv("../../data/ChicagoWeather.csv") %>% select(c(weather_main,
+                                                                  weather_description,
+                                                                  dt_iso))
 ```
 
 
@@ -22,16 +32,22 @@ crashes$CRASH_DATE <- as.POSIXlt(crashes$CRASH_DATE,
                                  format="%m/%d/%Y %H:%M:%S %p")
 weather$dt_iso <- as.POSIXlt(weather$dt_iso,
                              format="%Y-%m-%d %H:%M:%S +0000 UTC")
+weather$dt_iso <- weather$dt_iso %>% mdy_hms()
+crashes$dt_iso <- mdy_hms(round_date(crashes$CRASH_DATE,  unit='hour'))
+crashes_merged <- left_join(crashes, weather, by = 'dt_iso', keep=FALSE) %>%
+                    select(-c(dt_iso))
 ```
 
-```{r logisticregression}
-# Non-inflated logistic regression model
-logisticm1 <- ulam(
-  flist = alist(
-    # logistic regression model
-  )
-)
-  
+
+
+```{r missingness}
+replace_with_NA_all <- function(df, formule) {
+  df[rlang::as_function(formule)(df)] <- NA
+  df
+}
+
+replace_with_NA_all(crashes_merged, ~.x == "unknown")
+
 
 ```
 
