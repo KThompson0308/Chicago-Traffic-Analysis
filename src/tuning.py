@@ -3,42 +3,81 @@
 #################
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import RandomizedSearchCV, GridSearchCV, KFold
+from sklearn.model_selection import *
 import sklearn.model_selection
 from sklearn.metrics import log_loss, accuracy_score
 from scipy.stats import rv_continuous
+from sklearn.utils import resample
+
+
+def downsample(y, majority_case, minority_case):
+    filt1 = y==majority_case
+    majority = y[filt1]
+    filt2 = y==minority_case
+    minority = y[filt2]
+    downsampled_majority = resample(majority, replace=False, n_samples=len(minority))
+    return np.concatenate([majority, minority])
+
+
 
 
 class PurgedKFold(KFold):
-    def __init__(self, n_splits=3, t1=None, pctEmbargo=0):
-        if not isinstance(t1,pd.Series):
-            raise ValueError('Label Through Dates must be a pandas series')
+    def __init__(self,
+                 n_splits: int = 3,
+                 samples_info_sets: pd.Series = None,
+                 pct_embargo: float = 0.):
+
+        if not isinstance(samples_info_sets, pd.Series):
+            raise ValueError('The samples_info_sets param must be a pd.Series')
         super(PurgedKFold, self).__init__(n_splits, shuffle=False, random_state=None)
-        self.t1=t1
-        self.pctEmbargo=pctEmbargo
-    
-    def split(self, X, y=None, groups=None):
-        if (X.index==self.t1.index).sum() != len(self.t1):
-            raise ValueError('X and ThruDateValues must have the same index')
-        indices = np.arange(X.shape[0])
-        mbrg = int(X.shape[0]*self.pctEmbargo)
-        test_starts = [(i[0],i[-1]+1) for i in np.array_split(np.arange(X.shape[0]), self.n_splits)]
-        for i,j in test_starts:
-            t0 = self.t1.index[i]
-            test_indices = indices[i:j]
-            maxT1Idx = self.t1.index.searchsorted(self.t1[test_indices].max())
-            train_indices = self.t1.index.searchsorted(self.t1[self.t1<=t0].index)
-            train_indices = np.concatenate((train_indices, indices[maxT1Idx+mbrg:]))
-            import pdb; pdb.set_trace()
-            yield train_indices, test_indices
+
+        self.samples_info_sets = samples_info_sets
+        self.pct_embargo = pct_embargo
+
+    # noinspection PyPep8Naming
+    def split(self,
+              X: pd.DataFrame,
+              y: pd.Series = None,
+              groups=None):
+
+        if X.shape[0] != self.samples_info_sets.shape[0]:
+            raise ValueError("X and the 'samples_info_sets' series param must be the same length")
+
+        indices: np.ndarray = np.arange(X.shape[0])
+        embargo: int = int(X.shape[0] * self.pct_embargo)
+
+        test_ranges: [(int, int)] = [(ix[0], ix[-1] + 1) for ix in np.array_split(np.arange(X.shape[0]), self.n_splits)]
+        for start_ix, end_ix in test_ranges:
+            test_indices = indices[start_ix:end_ix]
+
+            if end_ix < X.shape[0]:
+                end_ix += embargo
+
+            test_times = pd.Series(index=[self.samples_info_sets[start_ix]], data=[self.samples_info_sets[end_ix-1]])
+            train_times = ml_get_train_times(self.samples_info_sets, test_times)
+
+            train_indices = []
+            for train_ix in train_times.index:
+                train_indices.append(self.samples_info_sets.index.get_loc(train_ix))
+            yield np.array(train_indices), test_indices
 
 
-def clfHyperFit(feat, tgt, t1, pipe_clf, param_grid, n_splits, rndSearchIter=0, n_jobs=-1, pctEmbargo=0, **fit_params):
+def ml_get_train_times(samples_info_sets: pd.Series, test_times: pd.Series) -> pd.Series:
+    train = samples_info_sets.copy(deep=True)
+    for start_ix, end_ix in test_times.iteritems():
+        df0 = train[(start_ix <= train.index) & (train.index <= end_ix)].index  # Train starts within test
+        df1 = train[(start_ix <= train) & (train <= end_ix)].index  # Train ends within test
+        df2 = train[(train.index <= start_ix) & (end_ix <= train)].index  # Train envelops test
+        train = train.drop(df0.union(df1).union(df2))
+    return train
+
+
+def clfHyperFit(feat, tgt, t1, pipe_clf, param_grid, n_splits, rndSearchIter=0, n_jobs=-1, pct_embargo=0, **fit_params):
     if set(tgt.values) == {0,1}:
         scoring='f1'
     else:
         scoring='neg_log_loss'
-    inner_cv = PurgedKFold(n_splits=n_splits, t1=t1, pctEmbargo=pctEmbargo)
+    inner_cv = PurgedKFold(n_splits=n_splits, samples_info_sets=t1, pct_embargo=pct_embargo)
     if rndSearchIter==0:
         gs=GridSearchCV(estimator=pipe_clf, param_grid=param_grid, scoring=scoring, cv=inner_cv, \
                         n_jobs=n_jobs,iid=False)
@@ -78,68 +117,4 @@ def cvScore(clf,X,y,scoring='neg_log_loss',t1=None,n_splits=None, cvGen=None, pc
     return np.array(score)
 
 
-if __name__ == "__main__":
-    import pandas as pd
-    import numpy as np
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.svm import SVC
-    from sklearn.linear_model import LogisticRegression
 
-    categoricals = ['CRASH_DATE_EST_I', 'TRAFFIC_CONTROL_DEVICE', 'DEVICE_CONDITION',
-                'WEATHER_CONDITION', 'LIGHTING_CONDITION', 'TRAFFICWAY_TYPE',
-                'FIRST_CRASH_TYPE', 'TRAFFICWAY_TYPE', 'ROADWAY_SURFACE_COND',
-                'ROAD_DEFECT', 'REPORT_TYPE', 'CRASH_TYPE', 'INTERSECTION_RELATED_I',
-                'NOT_RIGHT_OF_WAY_I', 'HIT_AND_RUN_I', 'DAMAGE', 'PRIM_CONTRIBUTORY_CAUSE',
-                'SEC_CONTRIBUTORY_CAUSE', 'STREET_DIRECTION', 'STREET_NAME', 'PHOTOS_TAKEN_I',
-                'STATEMENTS_TAKEN_I', 'DOORING_I', 'WORK_ZONE_I', 'WORK_ZONE_TYPE', 'WORKERS_PRESENT_I',
-                'MOST_SEVERE_INJURY', 'BEAT_OF_OCCURRENCE']
-    dtypes = dict.fromkeys(categoricals, 'category')
-    crashes = pd.read_csv("../data/TrafficCrashesChicago.csv", parse_dates = ['CRASH_DATE',
-                                                                                    'DATE_POLICE_NOTIFIED'],dtype=dtypes)
-    weather = pd.read_csv("../data/ChicagoWeather.csv", usecols=['dt_iso',
-                                                                       'weather_main',
-                                                                       'weather_description'],
-                     dtype={'weather_main': 'category', 'weather_description': 'category'})
-    # Merge and Filter Dataset to relevant and processible time horizon
-    crashes = crashes[crashes.CRASH_DATE > '2018-01-01 00:00:00']
-    crashes['hourly'] = crashes['CRASH_DATE'].dt.round('H')
-    weather['dt_iso'] = pd.to_datetime(weather['dt_iso'], format="%Y-%m-%d %H:%M:%S +0000 UTC")
-    crashes_merged = pd.merge(crashes, weather, how='left', left_on='hourly', right_on = 'dt_iso')
-    # Replace unknown values with explicit missing values
-    crashes_merged = crashes_merged.replace('UNKNOWN', np.nan)
-    # Create Target Variable
-    def are_there_injuries(total_injuries):
-        if (total_injuries != np.nan):
-            return True if total_injuries > 0 else False
-        else:
-            return np.nan
-
-    crashes_merged['injuries'] = crashes_merged['INJURIES_TOTAL'].apply(lambda x: are_there_injuries(x))
-    inactive_variables = ['RD_NO', 'CRASH_DATE_EST_I', 'LANE_CNT', 'NOT_RIGHT_OF_WAY_I', 'HIT_AND_RUN_I', 'PHOTOS_TAKEN_I',
-                      'STATEMENTS_TAKEN_I', 'DOORING_I', 'WORK_ZONE_I', 'WORK_ZONE_TYPE', 'WORKERS_PRESENT_I', 'hourly',
-                      'dt_iso', 'DATE_POLICE_NOTIFIED', 'LONGITUDE', 'LATITUDE', 'LOCATION']
-    # Some variables are unusable because 95% + are missing, so we will drop them.
-    final_set = crashes_merged.drop(inactive_variables, axis=1)
-    final_set = final_set.dropna()
-    final_set = final_set.set_index('CRASH_DATE')
-    from sklearn.preprocessing import OneHotEncoder
-    from sklearn.compose import ColumnTransformer
-    from sklearn.pipeline import Pipeline
-
-    injuries = final_set[['injuries']]
-    nums = final_set.select_dtypes(['float64', 'int64'])
-    onehotencoded = pd.get_dummies(final_set.select_dtypes('category'))
-    final_set = pd.concat([injuries, nums, onehotencoded], axis=1)
-    y = final_set['injuries']
-    X = final_set.drop(['injuries'], axis=1)
-
-    import matplotlib.pyplot as plt
-    from multiprocessing import cpu_count
-
-    # Randomized Grid Search with Purged K-Fold Cross Validation
-    cores = cpu_count() - 1
-    idx = X.index.to_series()
-
-    grid = logUniform(0.01,5).rvs(size=1000)
-    
-    clfHyperFit(X, y, t1=idx, pipe_clf=LogisticRegression(), param_grid={'C':grid}, n_splits=3, rndSearchIter=1000, n_jobs = cores, pctEmbargo=0.2) 
