@@ -1,0 +1,32 @@
+version: '3.1'  # Version of docker-compose
+
+services:
+    postgresdb:
+        image: postgres:latest
+        # LOOK AWAY!!!
+        environment:
+            POSTGRES_PASSWORD: password1
+        # okay, now look back.
+        ports:
+            - 8080:8080
+
+    jupyter:
+        build:
+            context: .
+            dockerfile: jupyter.Dockerfile
+        image: kthompson395/traffic
+        volumes:
+            - ./data:/home/jovyan/work/data
+            - ./notebooks:/home/jovyan/work/notebooks
+        ports:
+            - 8888:8888
+  
+    mongodb:
+        image: mongo:latest
+        environment:
+
+        ports:
+            - 27017:27017
+
+
+volumes:
