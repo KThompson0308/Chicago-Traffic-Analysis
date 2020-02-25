@@ -1,0 +1,10 @@
+.git
+.ipynb_checkpoints/*
+Dockerfile
+.DS_Store
+.gitignore
+README.md
+data/__pycache__/*
+.pytest_cache/*
+.vscode/*
+data/*
